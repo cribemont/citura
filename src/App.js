@@ -20,12 +20,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-let titre_meta, titre_formulaire, texte_introduction, texte_rgpd = {};
+let titre_meta, titre_formulaire, texte_introduction, texte_rgpd, date_limite = {};
 
 function App() {
 
   const classes = useStyles();
   const [loaded, setLoaded] = useState(false);
+  const [active, setActive] = useState(true);
   const [listeAbonnements, setListeAbonnements] = useState(null);
   const [numPJ, setNumPJ] = useState(0);
   const [pj1, setPJ1] = useState('');
@@ -59,9 +60,9 @@ function App() {
 
   const handleAjoutReclamation = (nom_porteur, prenom_porteur, date_naissance, nom_payeur, prenom_payeur, abonnement, bic, iban, email) => {
     setIsSubmit(true);
-    const newReclamation = { 
-      nom_porteur:nom_porteur, 
-      prenom_porteur:prenom_porteur, 
+    const newReclamation = {
+      nom_porteur:nom_porteur,
+      prenom_porteur:prenom_porteur,
       date_naissance:date_naissance,
       nom_payeur:nom_payeur,
       prenom_payeur: prenom_payeur,
@@ -89,8 +90,8 @@ function App() {
       }
       apiClient.post('/upload', formData, {
         onUploadProgress: (ProgressEvent) => {
-          let progress = Math.round(
-            ProgressEvent.loaded / ProgressEvent.total * 100) + '%';
+          //let progress = Math.round(
+            //ProgressEvent.loaded / ProgressEvent.total * 100) + '%';
         }
       }).then(res => {
         let returnPJ = res.data;
@@ -109,7 +110,7 @@ function App() {
           if( numPJ === 2 ){
             if( p === 0 ) setPJ3(returnPJ[p].name);
           }
-          
+
         }
         setNumPJ(numTmpPJ);
         setListePJ([...listePJ, res.data]);
@@ -124,19 +125,26 @@ function App() {
     getListeAbonnements();
     getParametre();
   }, []);
-  
+
 
   useEffect( () => {
     if( parametre.length > 0 && listeAbonnements )
     {
-      titre_meta = parametre.find(el => el.nom === 'titre_meta');
+      titre_meta = parametre.find(element => element.nom === 'titre_meta');
       titre_formulaire = parametre.find(element => element.nom === 'titre_formulaire');
       texte_introduction = parametre.find(element => element.nom === 'texte_introduction');
       texte_rgpd = parametre.find(element => element.nom === 'texte_rgpd');
+      date_limite = parametre.find(element => element.nom === 'date_limite');
+
+      let past_date = new Date(date_limite.valeur);
+      let now = new Date();
+
+      if(past_date <= now) setActive(false);
+
       setLoaded(true);
     }
   }, [parametre, listeAbonnements])
-  
+
   return (
     <div>
       <Header />
@@ -157,32 +165,43 @@ function App() {
           </Paper>
       </Container>
       {
-        isSuccess ?
+        active ?
+          isSuccess ?
+          <Container maxWidth="md">
+              <Paper elevation={3}>
+                <Box p={2} m={2}>
+                  <Alert severity="success">Demande effectuée avec succès.</Alert>
+                </Box>
+              </Paper>
+          </Container>
+          :
+          <Container maxWidth="md">
+              <Paper elevation={3}>
+                <Box p={2} m={2}>
+                {
+                  !isSubmit ?
+                  <Formulaire listeAbonnements={listeAbonnements} validation={handleAjoutReclamation} handleUploadFile={handleUploadFile} numPJ={numPJ} listePJAjoutee={listePJ} />
+                  :
+                  <>
+                  Envoi en cours...
+                  </>
+                }
+                </Box>
+              </Paper>
+        </Container>
+        :
+        <>
         <Container maxWidth="md">
             <Paper elevation={3}>
               <Box p={2} m={2}>
-                <Alert severity="success">Demande effectuée avec succès.</Alert>
+                <Alert severity="warning">Le formulaire est inactif.</Alert>
               </Box>
             </Paper>
         </Container>
-        :
-        <Container maxWidth="md">
-            <Paper elevation={3}>
-              <Box p={2} m={2}>
-              {
-                !isSubmit ?
-                <Formulaire listeAbonnements={listeAbonnements} validation={handleAjoutReclamation} handleUploadFile={handleUploadFile} numPJ={numPJ} listePJAjoutee={listePJ} />
-                :
-                <>
-                Envoi en cours...
-                </>
-              }
-              </Box>
-            </Paper>
-      </Container>
+        </>
       }
-      
-      
+
+
       <Container maxWidth="md" >
         <Paper elevation={3}>
           <Box p={2} m={2}>

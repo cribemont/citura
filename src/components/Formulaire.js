@@ -94,7 +94,8 @@ const Formulaire = (props) => {
                  <TextField
                         id="date_naissance"
                         label="Date de naissance"
-                        type="date"                    
+                        type="date"
+                        placeholder="AAAA-MM-JJ"
                         value={props.values.title}
                         onChange={props.handleChange}
                         onBlur={props.handleBlur}     
@@ -300,7 +301,7 @@ export default withFormik({
   validationSchema: Yup.object().shape({
     nom_porteur: Yup.string().required('Champ obligatoire'),
     prenom_porteur: Yup.string().required('Champ obligatoire'),
-    date_naissance: Yup.date().required('Champ obligatoire'),
+    date_naissance: Yup.date('Veuillez indiquer une date au format AAAA-MM-JJ').required('Champ obligatoire - Format AAAA-MM-JJ').typeError('Veuillez indiquer une date au format AAAA-MM-JJ ( 1990-01-31 )'),
     nom_payeur: Yup.string().required('Champ obligatoire'),
     prenom_payeur: Yup.string().required('Champ obligatoire'),
     abonnement: Yup.string().required('Champ obligatoire'),
