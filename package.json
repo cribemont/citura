@@ -19,7 +19,7 @@
     "react-scripts": "4.0.1",
     "universal-cookie": "^4.0.4",
     "web-vitals": "^0.2.4",
-    "yup": "^0.32.1"
+    "yup": "^0.32.9"
   },
   "scripts": {
     "start": "react-scripts start",
